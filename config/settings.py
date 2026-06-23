@@ -7,6 +7,15 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-healthanalytic
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 ALLOWED_HOSTS = ['*']
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://healthanalyticsips-production.up.railway.app',
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

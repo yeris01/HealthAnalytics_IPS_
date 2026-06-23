@@ -26,21 +26,7 @@ SECRET_KEY = 'django-insecure-healthanalytics-ips-secret-key-2024'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = [
-    'healthanalyticsips-production.up.railway.app',
-    'localhost',
-    '127.0.0.1',
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://healthanalyticsips-production.up.railway.app',
-]
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
