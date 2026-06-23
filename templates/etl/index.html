@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}ETL - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-arrow-repeat me-2 text-primary"></i>Proceso ETL{% endblock %}
+{% block content %}
+<div class="row g-3 mb-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header"><i class="bi bi-play-circle me-2"></i>Ejecutar ETL</div>
+      <div class="card-body">
+        <p class="text-secondary small mb-3">Procesa el dataset clínico entregado (Extract &rarr; Transform &rarr; Load): elimina duplicados, corrige nulos, valida rangos, calcula IMC y clasifica el riesgo.</p>
+        <button id="btnRunEtl" class="btn btn-primary"><i class="bi bi-lightning-charge me-1"></i>Ejecutar proceso ETL</button>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 h-100">
+      <div class="card-header"><i class="bi bi-cloud-upload me-2"></i>Carga manual de dataset</div>
+      <div class="card-body">
+        <p class="text-secondary small mb-3">Sube un nuevo archivo <code>CSV</code> o <code>Excel</code>. Se valida el formato y se ejecuta el ETL automáticamente.</p>
+        <input type="file" id="fileDataset" class="form-control mb-2" accept=".csv,.xlsx,.xls">
+        <button id="btnUpload" class="btn btn-outline-primary"><i class="bi bi-upload me-1"></i>Subir y procesar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-header"><i class="bi bi-clipboard-data me-2"></i>Resultado del último proceso</div>
+  <div class="card-body"><pre id="etlResult" class="mb-0 text-secondary small">Aún no se ha ejecutado el ETL en esta sesión.</pre></div>
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span><i class="bi bi-clock-history me-2"></i>Historial ETL</span>
+    <button id="btnRefresh" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-clockwise"></i></button>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-dark table-hover mb-0 align-middle">
+        <thead><tr>
+          <th>Fecha</th><th>Usuario</th><th>Fuente</th><th>Extraídos</th>
+          <th>Duplicados</th><th>Nulos</th><th>Cargados</th><th>Tiempo</th><th>Estado</th>
+        </tr></thead>
+        <tbody id="logsBody"><tr><td colspan="9" class="text-center text-muted py-3">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function estadoBadge(e){
+  const m={exitoso:'success',error:'danger',en_proceso:'warning'};
+  return `<span class="badge bg-${m[e]||'secondary'}">${e}</span>`;
+}
+async function cargarLogs(){
+  try{
+    const r=await apiCall('/api/etl/logs/');
+    const data=await r.json();
+    const body=document.getElementById('logsBody');
+    if(!Array.isArray(data)||!data.length){body.innerHTML='<tr><td colspan="9" class="text-center text-muted py-3">Sin registros</td></tr>';return;}
+    body.innerHTML=data.map(l=>`<tr>
+      <td>${(l.fecha||'').replace('T',' ').slice(0,16)}</td>
+      <td>${l.usuario||'—'}</td>
+      <td>${l.archivo_fuente||'—'}</td>
+      <td>${l.registros_extraidos??0}</td>
+      <td>${l.registros_duplicados??0}</td>
+      <td>${l.registros_nulos_corregidos??0}</td>
+      <td>${l.registros_cargados??0}</td>
+      <td>${l.tiempo_ejecucion??0}s</td>
+      <td>${estadoBadge(l.estado)}</td>
+    </tr>`).join('');
+  }catch(e){console.error(e);}
+}
+function mostrarResultado(l){
+  document.getElementById('etlResult').textContent=
+    `Fuente: ${l.archivo_fuente||'—'}\nEstado: ${l.estado}\n`+
+    `Extraídos: ${l.registros_extraidos} | Duplicados eliminados: ${l.registros_duplicados} | `+
+    `Nulos corregidos: ${l.registros_nulos_corregidos} | Cargados: ${l.registros_cargados}\n`+
+    `Tiempo: ${l.tiempo_ejecucion}s\n${l.mensaje||''}`;
+}
+document.getElementById('btnRunEtl').addEventListener('click',async function(){
+  this.disabled=true;showSpinner&&showSpinner();
+  try{
+    const r=await apiCall('/api/etl/ejecutar/','POST',{});
+    const l=await r.json();
+    if(r.ok){mostrarResultado(l);showToast('ETL ejecutado correctamente');cargarLogs();}
+    else{showToast('Error al ejecutar ETL','danger');}
+  }catch(e){showToast('Error de red','danger');}
+  finally{this.disabled=false;hideSpinner&&hideSpinner();}
+});
+document.getElementById('btnUpload').addEventListener('click',async function(){
+  const inp=document.getElementById('fileDataset');
+  if(!inp.files.length){showToast('Selecciona un archivo primero','warning');return;}
+  const fd=new FormData();fd.append('archivo',inp.files[0]);
+  this.disabled=true;showSpinner&&showSpinner();
+  try{
+    const headers={'X-CSRFToken':getCookie('csrftoken')};
+    if(accessToken)headers['Authorization']='Bearer '+accessToken;
+    const r=await fetch('/api/etl/subir/',{method:'POST',headers,body:fd,credentials:'include'});
+    const l=await r.json();
+    if(r.ok){mostrarResultado(l);showToast('Dataset cargado y procesado');cargarLogs();}
+    else{showToast(l.error||'Error al subir archivo','danger');}
+  }catch(e){showToast('Error de red','danger');}
+  finally{this.disabled=false;hideSpinner&&hideSpinner();}
+});
+document.getElementById('btnRefresh').addEventListener('click',cargarLogs);
+cargarLogs();
+</script>
+{% endblock %}

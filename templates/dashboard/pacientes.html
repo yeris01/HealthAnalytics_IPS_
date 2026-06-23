@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Pacientes - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-people-fill me-2 text-primary"></i>Pacientes{% endblock %}
+{% block content %}
+<div class="card shadow-sm border-0"><div class="card-body table-responsive">
+<table class="table table-hover align-middle"><thead><tr><th>ID</th><th>Nombre</th><th>Edad</th><th>Sexo</th><th>Riesgo</th><th>Crítico</th></tr></thead><tbody>
+{% for p in pacientes %}<tr><td>{{ p.id_paciente }}</td><td>{{ p.nombres }} {{ p.apellidos }}</td><td>{{ p.edad }}</td><td>{{ p.sexo }}</td><td>{{ p.riesgo_enfermedad }}</td><td>{{ p.es_critico|yesno:'Sí,No' }}</td></tr>{% empty %}<tr><td colspan="6" class="text-center text-muted">No hay pacientes cargados. Ejecute el ETL.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-grid-1x2-fill me-2 text-primary"></i>Dashboard Principal{% endblock %}
+
+{% block content %}
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-blue">
+            <div class="kpi-label">Total Pacientes</div>
+            <div class="kpi-value" id="kpi-total">{{ kpis.total_pacientes|default:"0" }}</div>
+            <i class="bi bi-people-fill kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-red">
+            <div class="kpi-label">Críticos</div>
+            <div class="kpi-value" id="kpi-criticos">{{ kpis.pacientes_criticos|default:"0" }}</div>
+            <i class="bi bi-exclamation-triangle-fill kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-orange">
+            <div class="kpi-label">Hipertensos</div>
+            <div class="kpi-value" id="kpi-hipertensos">{{ kpis.pacientes_hipertensos|default:"0" }}</div>
+            <i class="bi bi-heart-fill kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-purple">
+            <div class="kpi-label">Diabéticos</div>
+            <div class="kpi-value" id="kpi-diabeticos">{{ kpis.pacientes_diabeticos|default:"0" }}</div>
+            <i class="bi bi-droplet-fill kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-teal">
+            <div class="kpi-label">Fumadores</div>
+            <div class="kpi-value" id="kpi-fumadores">{{ kpis.pacientes_fumadores|default:"0" }}</div>
+            <i class="bi bi-wind kpi-icon"></i>
+        </div>
+    </div>
+    <div class="col-6 col-lg-2">
+        <div class="kpi-card kpi-green">
+            <div class="kpi-label">Obesidad</div>
+            <div class="kpi-value" id="kpi-obesidad">{{ kpis.pacientes_obesidad|default:"0" }}</div>
+            <i class="bi bi-activity kpi-icon"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Promedios clínicos -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <div class="text-muted small">Edad Promedio</div>
+            <div class="fw-bold fs-4 text-primary">{{ kpis.edad_promedio|default:"0" }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">años</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <div class="text-muted small">IMC Promedio</div>
+            <div class="fw-bold fs-4 text-warning">{{ kpis.imc_promedio|default:"0" }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">kg/m²</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <div class="text-muted small">Glucosa Promedio</div>
+            <div class="fw-bold fs-4 text-danger">{{ kpis.glucosa_promedio|default:"0" }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">mg/dL</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3">
+            <div class="text-muted small">Presión Sistólica Prom.</div>
+            <div class="fw-bold fs-4 text-info">{{ kpis.presion_promedio|default:"0" }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">mmHg</div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficas -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-pie-chart-fill text-primary me-2"></i>Distribución por Riesgo
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartRiesgo"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-bar-chart-fill text-success me-2"></i>Distribución por Edad
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartEdad"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-graph-up text-warning me-2"></i>Clasificación IMC
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="chartIMC"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-graph-up-arrow text-info me-2"></i>Tendencia de Consultas Mensuales
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height:220px;">
+                    <canvas id="chartTendencia"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-gender-ambiguous text-purple me-2"></i>Por Sexo
+            </div>
+            <div class="card-body">
+                <div class="chart-container" style="height:220px;">
+                    <canvas id="chartSexo"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos ETL y Pacientes Críticos -->
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-clock-history text-secondary me-2"></i>Últimos Procesos ETL</span>
+                <a href="{% url 'etl:index' %}" class="btn btn-sm btn-outline-primary">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0">
+                        <thead><tr><th>Fecha</th><th>Registros</th><th>Tiempo</th><th>Estado</th></tr></thead>
+                        <tbody>
+                        {% for log in logs_recientes %}
+                        <tr>
+                            <td class="small">{{ log.fecha_ejecucion|date:"d/m/Y H:i" }}</td>
+                            <td>{{ log.registros_cargados }}</td>
+                            <td>{{ log.tiempo_ejecucion }}s</td>
+                            <td>
+                                {% if log.estado == 'exitoso' %}
+                                <span class="badge bg-success">Exitoso</span>
+                                {% elif log.estado == 'error' %}
+                                <span class="badge bg-danger">Error</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">En proceso</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center text-muted py-3">Sin procesos ETL ejecutados</td></tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>Pacientes Críticos</span>
+                <a href="{% url 'dashboard:pacientes' %}?critico=true" class="btn btn-sm btn-outline-danger">Ver todos</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-sm mb-0" id="tablaCriticos">
+                        <thead><tr><th>Paciente</th><th>P.Sistólica</th><th>Glucosa</th><th>Sat.O2</th></tr></thead>
+                        <tbody>
+                            <tr><td colspan="4" class="text-center text-muted py-3">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const COLORES_RIESGO = {
+    'bajo': '#34a853', 'medio': '#fbbc04', 'alto': '#f57c00', 'critico': '#ea4335'
+};
+
+async function cargarDashboard() {
+    try {
+        // KPIs
+        const kpisResp = await apiCall('/api/dashboard/kpis/');
+        if (kpisResp.ok) {
+            const kpis = await kpisResp.json();
+            document.getElementById('kpi-total').textContent = kpis.total_pacientes || 0;
+            document.getElementById('kpi-criticos').textContent = kpis.pacientes_criticos || 0;
+            document.getElementById('kpi-hipertensos').textContent = kpis.pacientes_hipertensos || 0;
+            document.getElementById('kpi-diabeticos').textContent = kpis.pacientes_diabeticos || 0;
+            document.getElementById('kpi-fumadores').textContent = kpis.pacientes_fumadores || 0;
+            document.getElementById('kpi-obesidad').textContent = kpis.pacientes_obesidad || 0;
+
+            // Gráfica riesgo
+            const riesgo = kpis.distribucion_riesgo || {};
+            new Chart(document.getElementById('chartRiesgo'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(riesgo).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        data: Object.values(riesgo),
+                        backgroundColor: Object.keys(riesgo).map(k => COLORES_RIESGO[k] || '#999'),
+                        borderWidth: 2, borderColor: '#fff'
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+            });
+        }
+
+        // Distribución edad
+        const edadResp = await apiCall('/api/analytics/edad/');
+        if (edadResp.ok) {
+            const edadData = await edadResp.json();
+            new Chart(document.getElementById('chartEdad'), {
+                type: 'bar',
+                data: {
+                    labels: edadData.map(d => d.grupo),
+                    datasets: [{ label: 'Pacientes', data: edadData.map(d => d.total),
+                        backgroundColor: '#1a73e8', borderRadius: 6 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        // IMC
+        const imcResp = await apiCall('/api/analytics/imc/');
+        if (imcResp.ok) {
+            const imcData = await imcResp.json();
+            new Chart(document.getElementById('chartIMC'), {
+                type: 'pie',
+                data: {
+                    labels: imcData.map(d => d.clasificacion),
+                    datasets: [{ data: imcData.map(d => d.total),
+                        backgroundColor: ['#4fc3f7','#34a853','#fbbc04','#ea4335'],
+                        borderWidth: 2, borderColor: '#fff' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { font: { size: 11 } } } } }
+            });
+        }
+
+        // Tendencia
+        const tendResp = await apiCall('/api/analytics/tendencia/');
+        if (tendResp.ok) {
+            const tendData = await tendResp.json();
+            new Chart(document.getElementById('chartTendencia'), {
+                type: 'line',
+                data: {
+                    labels: tendData.map(d => d.mes),
+                    datasets: [{ label: 'Consultas', data: tendData.map(d => d.total),
+                        borderColor: '#1a73e8', backgroundColor: 'rgba(26,115,232,0.1)',
+                        fill: true, tension: 0.4, pointRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } } }
+            });
+        }
+
+        // Sexo
+        const sexoResp = await apiCall('/api/analytics/sexo/');
+        if (sexoResp.ok) {
+            const sexoData = await sexoResp.json();
+            new Chart(document.getElementById('chartSexo'), {
+                type: 'doughnut',
+                data: {
+                    labels: sexoData.map(d => d.sexo === 'M' ? 'Masculino' : 'Femenino'),
+                    datasets: [{ data: sexoData.map(d => d.total),
+                        backgroundColor: ['#1a73e8','#ea4335'],
+                        borderWidth: 2, borderColor: '#fff' }]
+                },
+                options: { responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } } }
+            });
+        }
+
+        // Críticos
+        const criticosResp = await apiCall('/api/analytics/criticos/');
+        if (criticosResp.ok) {
+            const criticos = await criticosResp.json();
+            const tbody = document.querySelector('#tablaCriticos tbody');
+            if (criticos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Sin pacientes críticos</td></tr>';
+            } else {
+                tbody.innerHTML = criticos.slice(0, 8).map(p => `
+                    <tr>
+                        <td class="small fw-semibold">${p.nombres} ${p.apellidos}</td>
+                        <td><span class="badge bg-danger">${p.presion_sistolica}</span></td>
+                        <td>${p.glucosa}</td>
+                        <td>${p.saturacion_oxigeno}%</td>
+                    </tr>
+                `).join('');
+            }
+        }
+    } catch(e) { console.error('Error cargando dashboard:', e); }
+}
+
+document.addEventListener('DOMContentLoaded', cargarDashboard);
+</script>
+{% endblock %}
