@@ -1,6 +1,123 @@
 {% extends 'base.html' %}
 {% block title %}Analítica - HealthAnalytics IPS{% endblock %}
-{% block page_title %}<i class="bi bi-hospital me-2 text-primary"></i>Analítica{% endblock %}
+{% block page_title %} <i class="bi bi-bar-chart-fill me-2 text-primary"></i>Analítica
+{% endblock %}
+
 {% block content %}
-<div class="card shadow-sm border-0"><div class="card-body"><p class="mb-0">Módulo de analítica disponible y conectada correctamente.</p></div></div>
+
+<div class="row g-3">
+
+```
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">Distribución por Edad</div>
+        <div class="card-body">
+            <canvas id="chartEdad"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">Clasificación IMC</div>
+        <div class="card-body">
+            <canvas id="chartIMC"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">Distribución por Sexo</div>
+        <div class="card-body">
+            <canvas id="chartSexo"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-6">
+    <div class="card">
+        <div class="card-header">Tendencia de Consultas</div>
+        <div class="card-body">
+            <canvas id="chartTendencia"></canvas>
+        </div>
+    </div>
+</div>
+```
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+<script>
+
+async function cargarAnalitica() {
+
+    // Edad
+    const edadResp = await fetch('/api/analytics/edad/');
+    const edad = await edadResp.json();
+
+    new Chart(document.getElementById('chartEdad'), {
+        type: 'bar',
+        data: {
+            labels: edad.map(x => x.grupo),
+            datasets: [{
+                label: 'Pacientes',
+                data: edad.map(x => x.total)
+            }]
+        }
+    });
+
+    // IMC
+    const imcResp = await fetch('/api/analytics/imc/');
+    const imc = await imcResp.json();
+
+    new Chart(document.getElementById('chartIMC'), {
+        type: 'doughnut',
+        data: {
+            labels: imc.map(x => x.clasificacion),
+            datasets: [{
+                data: imc.map(x => x.total)
+            }]
+        }
+    });
+
+    // Sexo
+    const sexoResp = await fetch('/api/analytics/sexo/');
+    const sexo = await sexoResp.json();
+
+    new Chart(document.getElementById('chartSexo'), {
+        type: 'pie',
+        data: {
+            labels: sexo.map(x => x.sexo),
+            datasets: [{
+                data: sexo.map(x => x.total)
+            }]
+        }
+    });
+
+    // Tendencia
+    const tendResp = await fetch('/api/analytics/tendencia/');
+    const tendencia = await tendResp.json();
+
+    new Chart(document.getElementById('chartTendencia'), {
+        type: 'line',
+        data: {
+            labels: tendencia.map(x => x.mes),
+            datasets: [{
+                label: 'Consultas',
+                data: tendencia.map(x => x.total),
+                fill: false
+            }]
+        }
+    });
+
+}
+
+document.addEventListener('DOMContentLoaded', cargarAnalitica);
+
+</script>
+
 {% endblock %}
