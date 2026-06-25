@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from dashboard import views as dashboard_views
 from analytics import views as analytics_views
 from etl import views as etl_views
@@ -37,8 +38,17 @@ urlpatterns = [
     path('api/ml/entrenar/', ml_views.entrenar, name='api_ml_entrenar_global'),
     path('api/ml/predecir/', ml_views.predecir, name='api_ml_predecir_global'),
     path('api/ml/predecir-todos/', ml_views.predecir_todos, name='api_ml_predecir_todos_global'),
+    path('api/ml/segmentar/', ml_views.segmentar, name='api_ml_segmentar_global'),
+    path('api/ml/anomalias/', ml_views.detectar_anomalias, name='api_ml_anomalias_global'),
     path('api/reports/resumen/', reports_views.resumen, name='api_reports_resumen_global'),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# API Docs (Swagger/OpenAPI)
+urlpatterns += [
+    path('api/docs/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/docs/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+]

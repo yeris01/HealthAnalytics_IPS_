@@ -28,6 +28,8 @@ class Paciente(models.Model):
     riesgo_enfermedad = models.CharField(max_length=20, choices=RIESGO_CHOICES, default='bajo')
     fecha_consulta = models.DateField()
     es_critico = models.BooleanField(default=False, db_index=True)
+    cluster = models.IntegerField(null=True, blank=True, help_text="Cluster asignado por K-Means")
+    es_anomalia = models.BooleanField(default=False, help_text="Detectado como anomalía por Isolation Forest")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
 

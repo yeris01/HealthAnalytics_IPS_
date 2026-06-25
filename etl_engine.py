@@ -155,7 +155,7 @@ def generar_dataset(n_registros=1800, ruta_salida=None):
 
 def limpiar_diagnostico(diag):
     """Normaliza diagnósticos con errores ortográficos."""
-    if not isinstance(diag, str):
+    if not isinstance(diag, str) or not diag.strip():
         return 'sin diagnóstico'
     diag = diag.strip().lower()
     mapeo = {
