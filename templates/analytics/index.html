@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Analítica - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-bar-chart-fill me-2 text-primary"></i>Analítica{% endblock %}
+{% block content %}
+<div class="row g-3 mb-4">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-pie-chart-fill me-2" style="color:var(--primary);"></i>Distribución por Edad</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="chartEdad"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-bar-chart-fill me-2" style="color:var(--secondary);"></i>Clasificación IMC</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="chartIMC"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-gender-ambiguous me-2" style="color:var(--purple);"></i>Distribución por Sexo</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="chartSexo"></canvas></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-graph-up me-2" style="color:var(--teal);"></i>Tendencia de Consultas</div>
+      <div class="card-body">
+        <div class="chart-container"><canvas id="chartTendencia"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const COLORES = { bajo: '#00D97E', medio: '#FFB800', alto: '#FF6B35', critico: '#FF3B3B' };
+const chartOps = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { position: 'bottom', labels: { padding: 14, font: { size: 11 }, boxWidth: 12, usePointStyle: true, color: '#6B7A99' } } }
+};
+async function cargarAnalitica() {
+  const r1 = await apiCall('/api/analytics/edad/');
+  if (r1.ok) {
+    const d = await r1.json();
+    new Chart(document.getElementById('chartEdad'), {
+      type: 'bar',
+      data: { labels: d.map(x => x.grupo), datasets: [{ label: 'Pacientes', data: d.map(x => x.total), backgroundColor: 'rgba(0,102,255,0.6)', borderColor: '#0066FF', borderWidth: 1, borderRadius: 6, borderSkipped: false }] },
+      options: { ...chartOps, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } }, x: { grid: { display: false } } } }
+    });
+  }
+  const r2 = await apiCall('/api/analytics/imc/');
+  if (r2.ok) {
+    const d = await r2.json();
+    new Chart(document.getElementById('chartIMC'), {
+      type: 'doughnut',
+      data: { labels: d.map(x => x.clasificacion), datasets: [{ data: d.map(x => x.total), backgroundColor: ['#0066FF','#00D97E','#FFB800','#FF3B3B'], borderWidth: 2, borderColor: '#0D1626' }] },
+      options: { ...chartOps, cutout: '68%' }
+    });
+  }
+  const r3 = await apiCall('/api/analytics/sexo/');
+  if (r3.ok) {
+    const d = await r3.json();
+    new Chart(document.getElementById('chartSexo'), {
+      type: 'doughnut',
+      data: { labels: d.map(x => x.sexo === 'M' ? 'Masculino' : 'Femenino'), datasets: [{ data: d.map(x => x.total), backgroundColor: ['#0066FF','#7B61FF'], borderWidth: 2, borderColor: '#0D1626' }] },
+      options: { ...chartOps, cutout: '68%' }
+    });
+  }
+  const r4 = await apiCall('/api/analytics/tendencia/');
+  if (r4.ok) {
+    const d = await r4.json();
+    new Chart(document.getElementById('chartTendencia'), {
+      type: 'line',
+      data: { labels: d.map(x => x.mes), datasets: [{ label: 'Consultas', data: d.map(x => x.total), borderColor: '#00C8B4', backgroundColor: 'rgba(0,200,180,0.08)', fill: true, tension: 0.45, pointRadius: 4, pointBackgroundColor: '#00C8B4', pointBorderColor: '#0D1626', pointBorderWidth: 2 }] },
+      options: { ...chartOps, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.04)' } }, x: { grid: { display: false } } } }
+    });
+  }
+}
+document.addEventListener('DOMContentLoaded', cargarAnalitica);
+</script>
+{% endblock %}

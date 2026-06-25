@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Machine Learning - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-cpu-fill me-2 text-primary"></i>Machine Learning{% endblock %}
+{% block content %}
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-gear me-2" style="color:var(--primary);"></i>Panel de Control</div>
+      <div class="card-body">
+        <p class="text-secondary-color small mb-3">Entrena modelos de clasificación de riesgo clínico utilizando Random Forest, regresión logística o árbol de decisión. Luego aplica predicciones a todos los pacientes.</p>
+        <div class="d-flex flex-wrap gap-2">
+          <button id="btnEntrenar" class="btn btn-primary"><i class="bi bi-play-fill me-1"></i>Entrenar Modelo</button>
+          <button id="btnPredecir" class="btn btn-success"><i class="bi bi-graph-up me-1"></i>Predecir Todos</button>
+        </div>
+        <hr class="divider my-3">
+        <div class="d-flex align-items-center gap-2">
+          <span style="font-size:0.78rem;color:var(--text-secondary);">Algoritmo:</span>
+          <select id="selectModelo" class="form-select form-select-sm" style="width:auto;">
+            <option value="random_forest">Random Forest</option>
+            <option value="logistic_regression">Regresión Logística</option>
+            <option value="decision_tree">Árbol de Decisión</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-info-circle me-2" style="color:var(--teal);"></i>Información del Modelo</div>
+      <div class="card-body">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between" style="border-bottom:1px solid var(--border-color);padding-bottom:4px;">
+            <span style="font-size:0.78rem;color:var(--text-secondary);">Variables de entrada</span>
+            <span class="mono" style="font-size:0.78rem;color:var(--primary);">12</span>
+          </div>
+          <div class="d-flex justify-content-between" style="border-bottom:1px solid var(--border-color);padding-bottom:4px;">
+            <span style="font-size:0.78rem;color:var(--text-secondary);">Clases de riesgo</span>
+            <span class="mono" style="font-size:0.78rem;color:var(--primary);">4 (bajo, medio, alto, crítico)</span>
+          </div>
+          <div class="d-flex justify-content-between" style="border-bottom:1px solid var(--border-color);padding-bottom:4px;">
+            <span style="font-size:0.78rem;color:var(--text-secondary);">Técnica de validación</span>
+            <span class="mono" style="font-size:0.78rem;color:var(--primary);">Train/Test 80/20</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="font-size:0.78rem;color:var(--text-secondary);">Balanceo de clases</span>
+            <span class="mono" style="font-size:0.78rem;color:var(--primary);">class_weight=balanced</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="resultado"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const resultado = document.getElementById('resultado');
+const selectModelo = document.getElementById('selectModelo');
+
+document.getElementById('btnEntrenar').addEventListener('click', async () => {
+  const tipo = selectModelo.value;
+  resultado.innerHTML = '<div class="alert alert-warning"><i class="bi bi-hourglass-split me-2"></i>Entrenando modelo...</div>';
+  try {
+    const r = await apiCall('/api/ml/entrenar/', 'POST', { tipo_modelo: tipo });
+    const data = await r.json();
+    if (data.error) {
+      resultado.innerHTML = `<div class="alert alert-danger">${data.mensaje}</div>`;
+      return;
+    }
+    resultado.innerHTML = `
+      <div class="card mb-3">
+        <div class="card-header" style="color:var(--secondary);border-bottom-color:rgba(0,217,126,0.2);">
+          <i class="bi bi-check-circle-fill me-2" style="color:var(--secondary);"></i>Modelo entrenado correctamente
+        </div>
+        <div class="card-body">
+          <div class="row g-2 mb-3">
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Accuracy</div><div class="stat-value" style="color:var(--primary);">${(data.accuracy*100).toFixed(1)}%</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Precision</div><div class="stat-value" style="color:var(--secondary);">${(data.precision*100).toFixed(1)}%</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">Recall</div><div class="stat-value" style="color:var(--warning);">${(data.recall*100).toFixed(1)}%</div></div></div>
+            <div class="col-6 col-md-3"><div class="stat-card"><div class="stat-label">F1 Score</div><div class="stat-value" style="color:var(--teal);">${(data.f1_score*100).toFixed(1)}%</div></div></div>
+          </div>
+          <div class="d-flex justify-content-between small text-secondary-color mb-2">
+            <span>Entrenamiento: ${data.total_entrenamiento} pacientes</span>
+            <span>Prueba: ${data.total_prueba} pacientes</span>
+            <span>Modelo: ${data.tipo_modelo}</span>
+          </div>
+          ${data.importancia_features && Object.keys(data.importancia_features).length ? `
+          <h6 class="text-secondary-color small mb-2" style="font-weight:600;text-transform:uppercase;letter-spacing:0.8px;">Importancia de Variables</h6>
+          <div class="d-flex flex-wrap gap-1">
+            ${Object.entries(data.importancia_features).sort((a,b) => b[1]-a[1]).map(([k,v]) => `
+              <span class="badge-status badge-exitoso" style="font-size:0.7rem;">${k}: ${(v*100).toFixed(1)}%</span>
+            `).join('')}
+          </div>` : ''}
+        </div>
+      </div>`;
+    showToast('Modelo entrenado exitosamente');
+  } catch(e) {
+    resultado.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+  }
+});
+
+document.getElementById('btnPredecir').addEventListener('click', async () => {
+  resultado.innerHTML = '<div class="alert alert-warning"><i class="bi bi-hourglass-split me-2"></i>Generando predicciones para todos los pacientes...</div>';
+  try {
+    const r = await apiCall('/api/ml/predecir-todos/', 'POST', {});
+    const data = await r.json();
+    if (data.error) {
+      resultado.innerHTML = `<div class="alert alert-danger">${data.mensaje}</div>`;
+      return;
+    }
+    resultado.innerHTML = `
+      <div class="card mb-3">
+        <div class="card-header" style="color:var(--secondary);border-bottom-color:rgba(0,217,126,0.2);">
+          <i class="bi bi-check-circle-fill me-2" style="color:var(--secondary);"></i>Predicciones realizadas
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-center gap-3">
+            <div class="stat-card" style="flex:1;"><div class="stat-label">Pacientes procesados</div><div class="stat-value" style="color:var(--primary);">${data.pacientes_procesados ?? '—'}</div></div>
+            <div class="stat-card" style="flex:1;"><div class="stat-label">Predicciones guardadas</div><div class="stat-value" style="color:var(--secondary);">${data.predicciones_guardadas ?? '—'}</div></div>
+          </div>
+          <p class="text-secondary-color small mt-2 mb-0">${data.mensaje || ''}</p>
+        </div>
+      </div>`;
+    showToast('Predicciones generadas correctamente');
+  } catch(e) {
+    resultado.innerHTML = `<div class="alert alert-danger">Error: ${e.message}</div>`;
+  }
+});
+</script>
+{% endblock %}

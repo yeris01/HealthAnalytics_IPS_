@@ -1,0 +1,371 @@
+{% extends 'base.html' %}
+{% block title %}Pacientes - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-people-fill me-2 text-primary"></i>Pacientes{% endblock %}
+{% block content %}
+<style>
+:root {
+  --pac-border: rgba(255,255,255,0.07);
+  --pac-hover: rgba(0,102,255,0.06);
+  --pac-radius: 12px;
+}
+.pac-search { max-width: 360px; }
+.pac-search .input-group-text { border-right: none; }
+.pac-search input { border-left: none; }
+.pac-search input:focus { box-shadow: none; border-color: rgba(0,102,255,0.4); }
+.filter-pill {
+  font-size: 0.75rem; padding: 5px 14px; border-radius: 20px;
+  border: 1px solid var(--border-color); cursor: pointer;
+  transition: all 0.15s; background: transparent; color: var(--text-secondary);
+  font-weight: 500;
+}
+.filter-pill:hover { border-color: rgba(0,102,255,0.3); color: var(--text-primary); }
+.filter-pill.active {
+  background: rgba(0,102,255,0.15); border-color: rgba(0,102,255,0.4);
+  color: var(--primary);
+}
+.filter-pill.riesgo-bajo.active { background: rgba(0,217,126,0.15); border-color: rgba(0,217,126,0.3); color: var(--secondary); }
+.filter-pill.riesgo-medio.active { background: rgba(255,184,0,0.15); border-color: rgba(255,184,0,0.3); color: var(--warning); }
+.filter-pill.riesgo-alto.active { background: rgba(255,107,53,0.15); border-color: rgba(255,107,53,0.3); color: var(--orange); }
+.filter-pill.riesgo-critico.active { background: rgba(255,59,59,0.15); border-color: rgba(255,59,59,0.3); color: var(--danger); }
+.table-pat { font-size: 0.85rem; }
+.table-pat th {
+  font-size: 0.7rem; letter-spacing: 0.6px;
+  cursor: pointer; user-select: none; position: relative;
+  white-space: nowrap;
+}
+.table-pat th:hover { color: var(--text-primary); }
+.table-pat th .sort-icon { opacity: 0.3; margin-left: 4px; font-size: 0.65rem; }
+.table-pat th:hover .sort-icon { opacity: 0.7; }
+.table-pat th.sort-active .sort-icon { opacity: 1; color: var(--primary); }
+.table-pat td { vertical-align: middle; }
+.pac-row { cursor: pointer; transition: background 0.12s; }
+.pac-row:hover { background: var(--pac-hover) !important; }
+.pac-row.selected { background: rgba(0,102,255,0.08) !important; border-left: 3px solid var(--primary); }
+.pac-id { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--text-muted); }
+.pac-name { font-weight: 600; font-size: 0.85rem; }
+.pac-name-sub { font-size: 0.75rem; color: var(--text-muted); }
+.risk-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.badge-riesgo-bajo { background: rgba(0,217,126,0.12); color: var(--secondary); border: 1px solid rgba(0,217,126,0.2); }
+.badge-riesgo-medio { background: rgba(255,184,0,0.12); color: var(--warning); border: 1px solid rgba(255,184,0,0.2); }
+.badge-riesgo-alto { background: rgba(255,107,53,0.12); color: var(--orange); border: 1px solid rgba(255,107,53,0.2); }
+.badge-riesgo-critico { background: rgba(255,59,59,0.12); color: var(--danger); border: 1px solid rgba(255,59,59,0.2); }
+.critico-dot {
+  width: 7px; height: 7px; border-radius: 50%; display: inline-block;
+  background: var(--danger); box-shadow: 0 0 6px var(--danger);
+}
+.critico-dot.safe { background: var(--secondary); box-shadow: 0 0 6px var(--secondary); }
+.pagination-info { font-size: 0.78rem; color: var(--text-muted); font-family: 'Space Mono', monospace; }
+.page-btn {
+  background: transparent; border: 1px solid var(--border-color);
+  color: var(--text-secondary); padding: 4px 12px; border-radius: 6px;
+  font-size: 0.78rem; transition: all 0.12s;
+}
+.page-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+.page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.page-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.pacientes-count { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px; }
+
+/* Detail Panel */
+.detail-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(7,14,28,0.6); backdrop-filter: blur(4px);
+  z-index: 1001; opacity: 0; transition: opacity 0.2s;
+}
+.detail-overlay.show { display: block; opacity: 1; }
+.detail-panel {
+  position: fixed; top: 0; right: -500px; width: 480px; max-width: 100vw;
+  height: 100vh; background: var(--bg-card);
+  border-left: 1px solid var(--border-color);
+  z-index: 1002; overflow-y: auto;
+  transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -8px 0 40px rgba(0,0,0,0.3);
+}
+.detail-panel.open { right: 0; }
+.detail-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border-color);
+  display: flex; justify-content: space-between; align-items: flex-start;
+  position: sticky; top: 0; background: var(--bg-card); z-index: 1;
+}
+.detail-header h5 { font-weight: 700; margin: 0; font-size: 1.1rem; }
+.detail-header small { color: var(--text-muted); font-size: 0.78rem; }
+.detail-close {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border-color);
+  background: transparent; color: var(--text-secondary); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: 0.12s;
+}
+.detail-close:hover { background: rgba(255,59,59,0.1); border-color: rgba(255,59,59,0.3); color: var(--danger); }
+.detail-body { padding: 20px 24px; }
+.detail-section { margin-bottom: 20px; }
+.detail-section-title {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 10px;
+}
+.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.detail-item {
+  background: rgba(255,255,255,0.02); border: 1px solid var(--border-color);
+  border-radius: 8px; padding: 10px 12px;
+}
+.detail-item.full { grid-column: 1 / -1; }
+.detail-item-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
+.detail-item-value { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-family: 'Space Mono', monospace; }
+.detail-item-value .unit { font-size: 0.7rem; color: var(--text-muted); font-weight: 400; margin-left: 2px; }
+.vital-normal { color: var(--secondary); }
+.vital-alert { color: var(--warning); }
+.vital-danger { color: var(--danger); }
+@media (max-width: 576px) {
+  .detail-panel { width: 100vw; }
+  .detail-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <div class="input-group input-group-sm pac-search">
+    <span class="input-group-text"><i class="bi bi-search" style="color:var(--text-muted);font-size:0.8rem;"></i></span>
+    <input type="text" class="form-control" id="searchPac" placeholder="Buscar paciente, diagnóstico..." style="font-size:0.82rem;">
+  </div>
+  <div class="d-flex gap-1 flex-wrap align-items-center">
+    <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600;margin-right:4px;">Riesgo:</span>
+    <button class="filter-pill active" data-filter="riesgo" data-value="">Todos</button>
+    <button class="filter-pill riesgo-bajo" data-filter="riesgo" data-value="bajo">Bajo</button>
+    <button class="filter-pill riesgo-medio" data-filter="riesgo" data-value="medio">Medio</button>
+    <button class="filter-pill riesgo-alto" data-filter="riesgo" data-value="alto">Alto</button>
+    <button class="filter-pill riesgo-critico" data-filter="riesgo" data-value="critico">Crítico</button>
+  </div>
+  <div class="d-flex gap-1 flex-wrap align-items-center">
+    <button class="filter-pill" data-filter="sexo" data-value="">Todos</button>
+    <button class="filter-pill" data-filter="sexo" data-value="M">Masculino</button>
+    <button class="filter-pill" data-filter="sexo" data-value="F">Femenino</button>
+  </div>
+  <button class="filter-pill" data-filter="critico" data-value="true" id="filterCritico">
+    <i class="bi bi-exclamation-triangle-fill me-1" style="color:var(--danger);font-size:0.6rem;"></i>Solo críticos
+  </button>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-pat table-hover mb-0">
+        <thead>
+          <tr>
+            <th data-orden="id_paciente" class="sort-active">ID <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th data-orden="apellidos">Nombre <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th data-orden="edad">Edad <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th>Sexo</th>
+            <th data-orden="imc">IMC <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th data-orden="riesgo_enfermedad">Riesgo <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th data-orden="es_critico">Crítico <i class="bi bi-arrow-down-up sort-icon"></i></th>
+            <th>Diagnóstico</th>
+          </tr>
+        </thead>
+        <tbody id="pacTableBody">
+          <tr><td colspan="8" class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm me-2"></div>Cargando pacientes...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+  <div class="pagination-info" id="paginationInfo">Cargando...</div>
+  <div class="d-flex gap-1" id="paginationControls"></div>
+</div>
+
+<!-- Detail Panel -->
+<div class="detail-overlay" id="detailOverlay"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="detail-header">
+    <div>
+      <h5 id="detNombre">---</h5>
+      <small id="detIdPaciente">ID: ---</small>
+    </div>
+    <button class="detail-close" id="closeDetail"><i class="bi bi-x-lg" style="font-size:0.75rem;"></i></button>
+  </div>
+  <div class="detail-body" id="detailBody">
+    <div class="text-center text-muted py-5"><i class="bi bi-person" style="font-size:2rem;display:block;margin-bottom:8px;opacity:0.3;"></i><span style="font-size:0.85rem;">Seleccione un paciente para ver su perfil</span></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const state = { pagina: 1, orden: 'id_paciente', q: '', riesgo: '', sexo: '', critico: '', por_pagina: 50, total_paginas: 1 };
+let debounceTimer = null;
+
+async function cargarPacientes() {
+  const params = new URLSearchParams({ pagina: state.pagina, orden: state.orden, por_pagina: state.por_pagina });
+  if (state.q) params.set('q', state.q);
+  if (state.riesgo) params.set('riesgo', state.riesgo);
+  if (state.sexo) params.set('sexo', state.sexo);
+  if (state.critico) params.set('critico', state.critico);
+  try {
+    const r = await apiCall(`/api/pacientes/?${params}`);
+    const data = await r.json();
+    const tbody = document.getElementById('pacTableBody');
+    if (!data.resultados || !data.resultados.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-inbox" style="font-size:1.5rem;display:block;margin-bottom:6px;opacity:0.4;"></i>No se encontraron pacientes</td></tr>';
+    } else {
+      tbody.innerHTML = data.resultados.map(p => {
+        const riesgoCls = `badge-riesgo-${p.riesgo_enfermedad}`;
+        const riesgoLabel = p.riesgo_enfermedad.charAt(0).toUpperCase() + p.riesgo_enfermedad.slice(1);
+        const sexoLabel = p.sexo === 'M' ? 'Masculino' : 'Femenino';
+        const criticoHtml = p.es_critico
+          ? '<span class="critico-dot" title="Crítico"></span>'
+          : '<span class="critico-dot safe" title="Estable"></span>';
+        return `<tr class="pac-row" data-id="${p.id_paciente}" onclick="abrirDetalle(${p.id_paciente})">
+          <td><span class="pac-id">#${p.id_paciente}</span></td>
+          <td><div class="pac-name">${p.nombres} ${p.apellidos}</div></td>
+          <td><span style="font-family:'Space Mono',monospace;font-size:0.82rem;">${p.edad}</span></td>
+          <td style="font-size:0.8rem;">${sexoLabel}</td>
+          <td><span style="font-family:'Space Mono',monospace;font-size:0.82rem;">${p.imc}</span></td>
+          <td><span class="risk-badge ${riesgoCls}">${riesgoLabel}</span></td>
+          <td style="text-align:center;">${criticoHtml}</td>
+          <td style="font-size:0.78rem;color:var(--text-secondary);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.diagnostico_preliminar || '—'}</td>
+        </tr>`;
+      }).join('');
+    }
+    state.total_paginas = data.total_paginas || 1;
+    document.getElementById('paginationInfo').textContent = `${data.total} pacientes | Página ${data.pagina} de ${data.total_paginas}`;
+    renderPagination();
+  } catch(e) {
+    document.getElementById('pacTableBody').innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Error al cargar pacientes</td></tr>';
+  }
+}
+
+function renderPagination() {
+  const c = document.getElementById('paginationControls');
+  const { pagina, total_paginas } = state;
+  if (total_paginas <= 1) { c.innerHTML = ''; return; }
+  let html = `<button class="page-btn" onclick="irPagina(1)" ${pagina <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-double-left"></i></button>`;
+  html += `<button class="page-btn" onclick="irPagina(${pagina - 1})" ${pagina <= 1 ? 'disabled' : ''}><i class="bi bi-chevron-left"></i></button>`;
+  const inicio = Math.max(1, pagina - 2);
+  const fin = Math.min(total_paginas, pagina + 2);
+  for (let i = inicio; i <= fin; i++) {
+    html += `<button class="page-btn ${i === pagina ? 'active' : ''}" onclick="irPagina(${i})">${i}</button>`;
+  }
+  html += `<button class="page-btn" onclick="irPagina(${pagina + 1})" ${pagina >= total_paginas ? 'disabled' : ''}><i class="bi bi-chevron-right"></i></button>`;
+  html += `<button class="page-btn" onclick="irPagina(${total_paginas})" ${pagina >= total_paginas ? 'disabled' : ''}><i class="bi bi-chevron-double-right"></i></button>`;
+  c.innerHTML = html;
+}
+
+function irPagina(p) {
+  if (p < 1 || p > state.total_paginas) return;
+  state.pagina = p;
+  cargarPacientes();
+  document.querySelector('.table-responsive').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function abrirDetalle(id) {
+  document.getElementById('detailOverlay').classList.add('show');
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('detNombre').textContent = 'Cargando...';
+  document.getElementById('detIdPaciente').textContent = '';
+  document.getElementById('detailBody').innerHTML = '<div class="text-center py-5"><div class="spinner-border" style="width:2rem;height:2rem;"></div></div>';
+  document.body.style.overflow = 'hidden';
+  apiCall(`/api/pacientes/${id}/`).then(r => r.json()).then(p => {
+    document.getElementById('detNombre').textContent = `${p.nombres} ${p.apellidos}`;
+    document.getElementById('detIdPaciente').textContent = `ID: #${p.id_paciente} | ${p.diagnostico_preliminar || 'Sin diagnóstico'}`;
+    const imcCls = p.imc < 18.5 ? 'vital-alert' : p.imc < 25 ? 'vital-normal' : p.imc < 30 ? 'vital-alert' : 'vital-danger';
+    const psCls = p.presion_sistolica >= 140 ? 'vital-danger' : p.presion_sistolica >= 120 ? 'vital-alert' : 'vital-normal';
+    const glucCls = p.glucosa >= 200 ? 'vital-danger' : p.glucosa >= 126 ? 'vital-alert' : 'vital-normal';
+    const satCls = p.saturacion_oxigeno < 90 ? 'vital-danger' : p.saturacion_oxigeno < 95 ? 'vital-alert' : 'vital-normal';
+    const riesgoCls = `badge-riesgo-${p.riesgo_enfermedad}`;
+    const riesgoLabel = p.riesgo_enfermedad.charAt(0).toUpperCase() + p.riesgo_enfermedad.slice(1);
+    document.getElementById('detailBody').innerHTML = `
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="risk-badge ${riesgoCls}" style="font-size:0.78rem;">${riesgoLabel}</span>
+        ${p.es_critico ? '<span class="risk-badge badge-riesgo-critico"><i class="bi bi-exclamation-triangle-fill me-1"></i>Crítico</span>' : '<span class="risk-badge" style="background:rgba(0,217,126,0.08);color:var(--secondary);border:1px solid rgba(0,217,126,0.15);">Estable</span>'}
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Información General</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Edad</div><div class="detail-item-value">${p.edad} <span class="unit">años</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Sexo</div><div class="detail-item-value">${p.sexo === 'M' ? 'Masculino' : 'Femenino'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Talla</div><div class="detail-item-value">${p.altura} <span class="unit">m</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Peso</div><div class="detail-item-value">${p.peso} <span class="unit">kg</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">IMC</div><div class="detail-item-value ${imcCls}">${p.imc} <span class="unit">kg/m²</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Clasificación IMC</div><div class="detail-item-value" style="font-size:0.82rem;">${p.clasificacion_imc || '—'}</div></div>
+          <div class="detail-item full"><div class="detail-item-label">Diagnóstico</div><div class="detail-item-value" style="font-size:0.85rem;font-family:inherit;">${p.diagnostico_preliminar || 'Sin diagnóstico'}</div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Signos Vitales</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">P. Sistólica</div><div class="detail-item-value ${psCls}">${p.presion_sistolica} <span class="unit">mmHg</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">P. Diastólica</div><div class="detail-item-value">${p.presion_diastolica} <span class="unit">mmHg</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Frec. Cardíaca</div><div class="detail-item-value">${p.frecuencia_cardiaca} <span class="unit">lpm</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Temperatura</div><div class="detail-item-value">${p.temperatura} <span class="unit">°C</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Glucosa</div><div class="detail-item-value ${glucCls}">${p.glucosa} <span class="unit">mg/dL</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Colesterol</div><div class="detail-item-value">${p.colesterol} <span class="unit">mg/dL</span></div></div>
+          <div class="detail-item"><div class="detail-item-label">Sat. O₂</div><div class="detail-item-value ${satCls}">${p.saturacion_oxigeno} <span class="unit">%</span></div></div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <div class="detail-section-title">Estilo de Vida</div>
+        <div class="detail-grid">
+          <div class="detail-item"><div class="detail-item-label">Fumador</div><div class="detail-item-value" style="font-size:0.82rem;">${p.fumador ? '<span class="vital-danger"><i class="bi bi-check-circle-fill me-1"></i>Sí</span>' : '<span class="vital-normal"><i class="bi bi-x-circle-fill me-1"></i>No</span>'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Alcohol</div><div class="detail-item-value" style="font-size:0.82rem;">${p.consumo_alcohol ? '<span class="vital-alert"><i class="bi bi-check-circle-fill me-1"></i>Sí</span>' : '<span class="vital-normal"><i class="bi bi-x-circle-fill me-1"></i>No</span>'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Ant. Familiares</div><div class="detail-item-value" style="font-size:0.82rem;">${p.antecedentes_familiares ? '<span class="vital-alert">Presentes</span>' : '<span class="vital-normal">No reporta</span>'}</div></div>
+          <div class="detail-item"><div class="detail-item-label">Actividad Física</div><div class="detail-item-value" style="font-size:0.82rem;text-transform:capitalize;">${p.actividad_fisica || '—'}</div></div>
+          <div class="detail-item full"><div class="detail-item-label">Fecha Consulta</div><div class="detail-item-value" style="font-size:0.82rem;font-family:inherit;">${p.fecha_consulta || '—'}</div></div>
+        </div>
+      </div>
+    `;
+  }).catch(() => {
+    document.getElementById('detailBody').innerHTML = '<div class="text-center text-danger py-4">Error al cargar detalle del paciente</div>';
+  });
+}
+
+function cerrarDetalle() {
+  document.getElementById('detailOverlay').classList.remove('show');
+  document.getElementById('detailPanel').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('closeDetail').addEventListener('click', cerrarDetalle);
+document.getElementById('detailOverlay').addEventListener('click', cerrarDetalle);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarDetalle(); });
+
+document.querySelectorAll('.filter-pill').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const filtro = this.dataset.filter;
+    const valor = this.dataset.value;
+    if (filtro === 'critico') {
+      this.classList.toggle('active');
+      state.critico = this.classList.contains('active') ? 'true' : '';
+    } else {
+      document.querySelectorAll(`.filter-pill[data-filter="${filtro}"]`).forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      if (filtro === 'riesgo') state.riesgo = valor;
+      if (filtro === 'sexo') state.sexo = valor;
+    }
+    state.pagina = 1;
+    cargarPacientes();
+  });
+});
+
+document.getElementById('searchPac').addEventListener('input', function() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    state.q = this.value.trim();
+    state.pagina = 1;
+    cargarPacientes();
+  }, 300);
+});
+
+document.querySelectorAll('.table-pat th[data-orden]').forEach(th => {
+  th.addEventListener('click', function() {
+    document.querySelectorAll('.table-pat th').forEach(h => h.classList.remove('sort-active'));
+    this.classList.add('sort-active');
+    state.orden = this.dataset.orden;
+    state.pagina = 1;
+    cargarPacientes();
+  });
+});
+
+cargarPacientes();
+</script>
+{% endblock %}

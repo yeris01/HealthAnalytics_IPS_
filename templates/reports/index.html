@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Reportes - HealthAnalytics IPS{% endblock %}
+{% block page_title %}<i class="bi bi-file-earmark-text-fill me-2 text-primary"></i>Reportes{% endblock %}
+{% block content %}
+{% if kpis %}
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card kpi-blue">
+      <div class="kpi-label">Total Pacientes</div>
+      <div class="kpi-value">{{ kpis.total_pacientes|default:"0" }}</div>
+      <i class="bi bi-people-fill kpi-icon"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card kpi-red">
+      <div class="kpi-label">Críticos</div>
+      <div class="kpi-value">{{ kpis.pacientes_criticos|default:"0" }}</div>
+      <i class="bi bi-exclamation-triangle-fill kpi-icon"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card kpi-orange">
+      <div class="kpi-label">Hipertensos</div>
+      <div class="kpi-value">{{ kpis.pacientes_hipertensos|default:"0" }}</div>
+      <i class="bi bi-heart-fill kpi-icon"></i>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kpi-card kpi-teal">
+      <div class="kpi-label">Edad Promedio</div>
+      <div class="kpi-value">{{ kpis.edad_promedio|default:"0" }}</div>
+      <i class="bi bi-calendar kpi-icon"></i>
+    </div>
+  </div>
+</div>
+{% endif %}
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-download me-2" style="color:var(--secondary);"></i>Exportar Datos</div>
+      <div class="card-body">
+        <p class="text-secondary-color small mb-3">Descargue la base de datos completa de pacientes en formato CSV o PDF para su análisis offline.</p>
+        <div class="d-flex gap-2">
+          <a class="btn btn-success" href="{% url 'reports:exportar_csv' %}">
+            <i class="bi bi-file-earmark-spreadsheet me-1"></i> Exportar CSV
+          </a>
+          <a class="btn btn-danger" href="{% url 'reports:exportar_pdf' %}">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Exportar PDF
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-info-circle me-2" style="color:var(--primary);"></i>Resumen del Sistema</div>
+      <div class="card-body">
+        <div class="d-flex flex-column gap-2">
+          <div class="d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--border-color);padding-bottom:6px;">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Pacientes en base de datos</span>
+            <span class="mono" style="color:var(--primary);font-weight:700;">{{ kpis.total_pacientes|default:"0" }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--border-color);padding-bottom:6px;">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Pacientes críticos</span>
+            <span class="mono" style="color:var(--danger);font-weight:700;">{{ kpis.pacientes_criticos|default:"0" }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--border-color);padding-bottom:6px;">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Pacientes hipertensos</span>
+            <span class="mono" style="color:var(--orange);font-weight:700;">{{ kpis.pacientes_hipertensos|default:"0" }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center" style="border-bottom:1px solid var(--border-color);padding-bottom:6px;">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Pacientes diabéticos</span>
+            <span class="mono" style="color:var(--warning);font-weight:700;">{{ kpis.pacientes_diabeticos|default:"0" }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span style="font-size:0.82rem;color:var(--text-secondary);">Pacientes con obesidad</span>
+            <span class="mono" style="color:var(--purple);font-weight:700;">{{ kpis.pacientes_obesidad|default:"0" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
