@@ -94,6 +94,16 @@ def entrenar_modelo(tipo_modelo='random_forest'):
     # Reporte detallado por clase
     reporte = classification_report(y_test, y_pred, target_names=clases, output_dict=True, zero_division=0)
 
+    # ROC AUC (uno vs resto para multiclase)
+    try:
+        if hasattr(modelo, 'predict_proba'):
+            y_proba = modelo.predict_proba(X_test)
+            rocauc = round(roc_auc_score(y_test, y_proba, multi_class='ovr', average='weighted'), 4)
+        else:
+            rocauc = None
+    except Exception:
+        rocauc = None
+
     # Importancia de características (si aplica)
     importancias = {}
     if hasattr(modelo, 'feature_importances_'):
@@ -119,6 +129,7 @@ def entrenar_modelo(tipo_modelo='random_forest'):
         'total_prueba': len(X_test),
         'cv_accuracy_mean': round(float(cv_scores.mean()), 4),
         'cv_accuracy_std': round(float(cv_scores.std()), 4),
+        'roc_auc': rocauc,
         'reporte_por_clase': {
             cls: {m: round(float(reporte[cls][m]), 4) for m in ['precision', 'recall', 'f1-score']}
             for cls in clases if cls in reporte

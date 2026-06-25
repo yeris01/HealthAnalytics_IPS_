@@ -33,6 +33,7 @@ urlpatterns = [
     path('api/etl/subir/', etl_views.subir_dataset, name='api_etl_subir_global'),
     path('api/etl/logs/', etl_views.logs_etl, name='api_etl_logs_global'),
     path('api/etl/resumen/', etl_views.resumen_etl, name='api_etl_resumen_global'),
+    path('api/etl/calidad/', etl_views.calidad_datos, name='api_etl_calidad_global'),
     path('api/ml/entrenar/', ml_views.entrenar, name='api_ml_entrenar_global'),
     path('api/ml/predecir/', ml_views.predecir, name='api_ml_predecir_global'),
     path('api/ml/predecir-todos/', ml_views.predecir_todos, name='api_ml_predecir_todos_global'),

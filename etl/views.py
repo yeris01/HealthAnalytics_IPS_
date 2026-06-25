@@ -69,3 +69,37 @@ def resumen_etl(request):
         'criticos': Paciente.objects.filter(es_critico=True).count(),
         'ultimo_etl': LogETLSerializer(ultimo).data if ultimo else None,
     })
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def calidad_datos(request):
+    """Devuelve métricas de calidad de datos de los pacientes."""
+    from django.db.models import Avg, StdDev, Min, Max, Count, Q
+    from etl.models import Paciente
+    total = Paciente.objects.count()
+    if total == 0:
+        return Response({'error': 'No hay datos. Ejecute el ETL primero.'})
+    stats = {}
+    for campo in ['edad', 'peso', 'altura', 'imc', 'presion_sistolica', 'glucosa', 'colesterol', 'saturacion_oxigeno', 'temperatura']:
+        agg = Paciente.objects.aggregate(
+            media=Avg(campo), min=Min(campo), max=Max(campo),
+            desv_std=StdDev(campo), nulos=Count('id') - Count(campo)
+        )
+        stats[campo] = {
+            'media': round(float(agg['media'] or 0), 2),
+            'min': round(float(agg['min'] or 0), 2),
+            'max': round(float(agg['max'] or 0), 2),
+            'desv_std': round(float(agg['desv_std'] or 0), 2),
+            'nulos': int(agg['nulos'] or 0),
+        }
+    return Response({
+        'total_pacientes': total,
+        'criticos': Paciente.objects.filter(es_critico=True).count(),
+        'distribucion_riesgo': dict(Paciente.objects.values_list('riesgo_enfermedad').annotate(total=Count('id'))),
+        'distribucion_sexo': dict(Paciente.objects.values_list('sexo').annotate(total=Count('id'))),
+        'distribucion_imc': dict(Paciente.objects.values_list('clasificacion_imc').annotate(total=Count('id'))),
+        'fumadores': Paciente.objects.filter(fumador=True).count(),
+        'diabeticos': Paciente.objects.filter(glucosa__gte=126).count(),
+        'hipertensos': Paciente.objects.filter(presion_sistolica__gte=140).count(),
+        'estadisticas': stats,
+    })

@@ -419,6 +419,33 @@ def dataset_entregado():
     return None
 
 
+def generar_perfil_calidad(datos_limpios, stats):
+    """Genera un perfil detallado de calidad de datos."""
+    perfil = {**stats}
+    if datos_limpios is not None and not datos_limpios.empty:
+        df = datos_limpios
+        perfil['columnas'] = list(df.columns)
+        perfil['total_columnas'] = len(df.columns)
+        perfil['memoria_kb'] = round(df.memory_usage(deep=True).sum() / 1024, 2)
+        num_cols = df.select_dtypes(include=[np.number]).columns
+        if len(num_cols):
+            perfil['estadisticas'] = {
+                col: {
+                    'min': round(float(df[col].min()), 2),
+                    'max': round(float(df[col].max()), 2),
+                    'media': round(float(df[col].mean()), 2),
+                    'mediana': round(float(df[col].median()), 2),
+                    'std': round(float(df[col].std()), 2),
+                    'nulos': int(df[col].isnull().sum()),
+                    'unicos': int(df[col].nunique()),
+                }
+                for col in num_cols[:20]
+            }
+        perfil['distribucion_sexo'] = df['sexo'].value_counts().to_dict() if 'sexo' in df else {}
+        perfil['distribucion_riesgo'] = df['riesgo_enfermedad'].value_counts().to_dict() if 'riesgo_enfermedad' in df else {}
+    return perfil
+
+
 def ejecutar_etl_completo(usuario=None, archivo_csv=None):
     """Ejecuta el proceso ETL completo: Extract -> Transform -> Load.
 

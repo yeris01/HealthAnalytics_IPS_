@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/etl/subir/', views.subir_dataset, name='api_subir'),
     path('api/etl/logs/', views.logs_etl, name='api_logs'),
     path('api/etl/resumen/', views.resumen_etl, name='api_resumen'),
+    path('api/etl/calidad/', views.calidad_datos, name='api_calidad'),
 ]
