@@ -10,32 +10,71 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a73e8;
-            --primary-dark: #1557b0;
-            --secondary: #34a853;
-            --warning: #fbbc04;
-            --danger: #ea4335;
-            --sidebar-width: 260px;
-            --sidebar-bg: #0B5ED7;
-            --sidebar-text: #a8b8cc;
-            --sidebar-active: #1a73e8;
+
+         /* Colores principales */
+         --primary: #A78BFA;          /* Morado pastel */
+         --primary-dark: #8B5CF6;
+         --primary-glow: rgba(167,139,250,0.25);
+
+         --secondary: #F9A8D4;        /* Rosa pastel */
+
+         /* Colores auxiliares */
+         --danger: #FCA5A5;
+         --warning: #FDE68A;
+         --purple: #C4B5FD;
+         --teal: #A7F3D0;
+         --orange: #FDBA74;
+
+         /* Sidebar */
+          --sidebar-bg: #FFFFFF;
+         --sidebar-border: #E9D5FF;
+         --sidebar-hover: #FAF5FF;
+ 
+         /* Fondos */
+         --bg-main: #FFF7FB;
+         --bg-card: #FFFFFF;
+         --bg-card-hover: #FDF4FF;
+
+         /* Bordes */
+         --border-color: #E9D5FF;
+
+         /* Textos */
+         --text-primary: #4C1D95;
+         --text-secondary: #7C3AED;
+         --text-muted: #A78BFA;
+
+         --sidebar-text: #7C3AED;
+         --sidebar-width: 270px;
         }
-        * { font-family: 'Inter', sans-serif; }
-        body { background: #ffffff; margin: 0; }
-        /* Sidebar */
-        .sidebar {
-            position: fixed; top: 0; left: 0;
-            width: var(--sidebar-width); height: 100vh;
-            background: var(--sidebar-bg);
-            overflow-y: auto; z-index: 1000;
-            transition: all 0.3s;
+
+        body{
+          background: linear-gradient( 135deg,#FFF7FB 0%,#FDF4FF 50%,#FAF5FF 100% );
+          font-family: 'Inter', sans-serif;
+          color: #4C1D95;
+        }
+
+        .sidebar{
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: var(--sidebar-width);
+          height: 100vh;
+          background: #FFFFFF;
+          border-right: 1px solid #E9D5FF;
+          overflow-y: auto;
+          z-index: 1000;
+          display: flex;
+          flex-direction: column;
         }
         .sidebar-brand {
             padding: 20px 20px 15px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         .sidebar-brand h4 {
-            color: white; font-weight: 700; margin: 0; font-size: 1.1rem;
+          color: #7C3AED;
+          font-weight: 700;
+          margin: 0;
+          font-size: 1.1rem;
         }
         .sidebar-brand small { color: var(--sidebar-text); font-size: 0.75rem; }
         .sidebar-nav { padding: 15px 0; }
@@ -50,9 +89,11 @@
             border-radius: 0; transition: all 0.2s;
             font-size: 0.9rem;
         }
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            color: white; background: rgba(26,115,232,0.2);
-            border-left: 3px solid var(--primary);
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: #7C3AED;
+            background: #F3E8FF;
+            border-left: 3px solid #A78BFA;
         }
         .sidebar .nav-link i { font-size: 1.1rem; width: 20px; }
 
@@ -62,8 +103,8 @@
             min-height: 100vh;
         }
         .topbar {
-            background: white; padding: 12px 25px;
-            border-bottom: 1px solid #e0e7ef;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E9D5FF;
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
@@ -71,8 +112,26 @@
         .content-area { padding: 25px; }
 
         /* Cards */
-        .card { background-color: #ffffff;}
-        .card-header { border-radius: 12px 12px 0 0 !important; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .card{
+         background: #FFFFFF;
+         border: 1px solid #F3E8FF;
+         border-radius: 18px;
+         box-shadow: 0 8px 25px rgba(167,139,250,0.12);
+         transition: all .3s ease;
+        }
+
+        .card:hover{
+         transform: translateY(-3px);
+         box-shadow: 0 12px 30px rgba(167,139,250,0.18);
+        }
+
+         .card-header{
+         background: #FAF5FF;
+         color: #7C3AED;
+         border-bottom: 1px solid #E9D5FF;
+         border-radius: 18px 18px 0 0 !important;
+         font-weight: 600;
+        }
 
         /* KPI Cards */
         .kpi-card {
@@ -89,12 +148,29 @@
         .kpi-card .kpi-label { font-size: 0.85rem; opacity: 0.9; }
         .kpi-card .kpi-icon { font-size: 2rem; opacity: 0.3; position: absolute; right: 15px; bottom: 10px; }
 
-        .kpi-blue { background: linear-gradient(135deg, #1a73e8, #4a9eff); }
-        .kpi-green { background: linear-gradient(135deg, #34a853, #5cbf7a); }
-        .kpi-orange { background: linear-gradient(135deg, #f57c00, #ffb74d); }
-        .kpi-red { background: linear-gradient(135deg, #ea4335, #ff7961); }
-        .kpi-purple { background: linear-gradient(135deg, #7b1fa2, #ba68c8); }
-        .kpi-teal { background: linear-gradient(135deg, #00796b, #4db6ac); }
+        .kpi-blue {
+          background: linear-gradient(135deg,#A78BFA,#C4B5FD);
+        }
+
+        .kpi-green {
+          background: linear-gradient(135deg,#F9A8D4,#FBCFE8);
+        }
+
+        .kpi-orange {
+          background: linear-gradient(135deg,#FDBA74,#FED7AA);
+        }
+
+        .kpi-red {
+          background: linear-gradient(135deg,#FCA5A5,#FECACA);
+        }
+
+        .kpi-purple {
+          background: linear-gradient(135deg,#8B5CF6,#D8B4FE);
+        }
+
+        .kpi-teal {
+          background: linear-gradient(135deg,#A7F3D0,#CCFBF1);
+        }
 
         /* Badges riesgo */
         .badge-bajo { background: #34a853; }
@@ -113,17 +189,26 @@
         }
 
         /* Buttons */
-        .btn-primary { background: var(--primary); border-color: var(--primary); }
-        .btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); }
-
+        .btn-primary {background: linear-gradient( 135deg, #A78BFA, #F9A8D4);border: none;}
+        .btn-primary:hover {background: linear-gradient( 135deg, #8B5CF6, #EC4899);}
         /* Charts */
         .chart-container { position: relative; height: 280px; }
 
         /* Loading spinner */
         .spinner-overlay {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.4);
-            z-index: 9999; justify-content: center; align-items: center;
+          display: none;
+          position: fixed;
+          top:0;
+          left:0;
+          width:100%;
+          height:100%;
+
+          background: rgba(255,245,250,0.85);
+          backdrop-filter: blur(10px);
+
+          z-index:9999;
+          justify-content:center;
+          align-items:center;
         }
         .spinner-overlay.active { display: flex; }
 
@@ -139,9 +224,11 @@
 <body>
     <!-- Spinner -->
     <div class="spinner-overlay" id="loadingSpinner">
-        <div class="text-center text-white">
+        <div class="text-center ">
             <div class="spinner-border mb-3" style="width:3rem;height:3rem;"></div>
-            <p>Procesando...</p>
+            <p style="color:#7C3AED;font-weight:600;">
+                 Procesando...
+            </p>
         </div>
     </div>
 
@@ -196,8 +283,8 @@
         <!-- User info at bottom -->
         <div style="position:absolute;bottom:0;left:0;right:0;padding:15px;border-top:1px solid rgba(255,255,255,0.1);">
             <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center"
-                     style="width:35px;height:35px;min-width:35px;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="background:linear-gradient(135deg,#8B5CF6,#F9A8D4);">
                     <span class="text-white fw-bold">{{ user.username|first|upper }}</span>
                 </div>
                 <div>
