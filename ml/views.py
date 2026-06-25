@@ -1,14 +1,32 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+
 from etl.models import Paciente
 
 
 @login_required
 def index(request):
-    return render(request, 'ml/index.html')
+
+    paciente_id = request.GET.get('paciente')
+
+    paciente = None
+
+    if paciente_id:
+        paciente = Paciente.objects.filter(
+            id_paciente=paciente_id
+        ).first()
+
+    return render(
+        request,
+        'ml/index.html',
+        {
+            'paciente': paciente
+        }
+    )
 
 
 # ==========================
@@ -25,16 +43,21 @@ def entrenar(request):
 
     try:
 
-        resultado = entrenar_modelo(tipo_modelo=tipo)
+        resultado = entrenar_modelo(
+            tipo_modelo=tipo
+        )
 
         return Response(resultado)
 
     except Exception as e:
 
-        return Response({
-            "error": True,
-            "mensaje": str(e)
-        }, status=500)
+        return Response(
+            {
+                "error": True,
+                "mensaje": str(e)
+            },
+            status=500
+        )
 
 
 # ==========================
@@ -49,16 +72,21 @@ def predecir(request):
 
     try:
 
-        resultado = predecir_paciente(request.data)
+        resultado = predecir_paciente(
+            request.data
+        )
 
         return Response(resultado)
 
     except Exception as e:
 
-        return Response({
-            "error": True,
-            "mensaje": str(e)
-        }, status=500)
+        return Response(
+            {
+                "error": True,
+                "mensaje": str(e)
+            },
+            status=500
+        )
 
 
 # ==========================
