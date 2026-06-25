@@ -1,142 +1,291 @@
 {% extends 'base.html' %}
-{% block title %}Iniciar Sesión — HealthAnalytics IPS{% endblock %}
+
+{% block title %}
+Iniciar Sesión — HealthAnalytics IPS
+{% endblock %}
 
 {% block auth_content %}
-<div style="min-height:100vh; background:#070E1C; display:flex; position:relative; overflow:hidden;">
 
-    <!-- Background grid -->
-    <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(0,102,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,102,255,0.04) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;"></div>
+<div class="container-fluid vh-100">
 
-    <!-- Glows -->
-    <div style="position:absolute;top:-200px;left:-100px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,102,255,0.07) 0%,transparent 70%);pointer-events:none;"></div>
-    <div style="position:absolute;bottom:-150px;right:-50px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(123,97,255,0.07) 0%,transparent 70%);pointer-events:none;"></div>
+    <div class="row h-100">
 
-    <!-- Left panel - branding -->
-    <div class="d-none d-lg-flex" style="width:45%;background:linear-gradient(135deg,rgba(0,102,255,0.08) 0%,rgba(123,97,255,0.08) 100%);border-right:1px solid rgba(255,255,255,0.06);flex-direction:column;align-items:center;justify-content:center;padding:60px;position:relative;">
-        <div style="max-width:360px;width:100%;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:48px;">
-                <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0066FF,#7B61FF);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,102,255,0.3);">
-                    <i class="bi bi-heart-pulse-fill text-white" style="font-size:1.2rem;"></i>
+        <!-- PANEL IZQUIERDO -->
+
+        <div class="col-lg-6 d-none d-lg-flex flex-column justify-content-center px-5"
+             style="background:linear-gradient(135deg,#faf7ff,#f5f2ff);">
+
+            <div style="max-width:500px;">
+
+                <div class="mb-5 d-flex align-items-center">
+
+                    <div
+                        class="rounded-3 d-flex align-items-center justify-content-center me-3"
+                        style="
+                            width:50px;
+                            height:50px;
+                            background:linear-gradient(135deg,#8b5cf6,#a855f7);
+                        ">
+                        <i class="bi bi-heart-pulse-fill text-white"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="fw-bold text-primary mb-0">
+                            HealthAnalytics
+                        </h5>
+
+                        <small class="text-muted">
+                            IPS Platform v1.0
+                        </small>
+                    </div>
+
                 </div>
-                <div>
-                    <div style="font-weight:700;color:#E8EEFF;font-size:1.1rem;">HealthAnalytics</div>
-                    <div style="font-size:0.7rem;color:#3D4E6B;font-family:'Space Mono',monospace;">IPS Platform v1.0</div>
+
+                <h1 class="fw-bold display-4">
+
+                    Analítica Clínica
+
+                    <br>
+
+                    <span style="color:#6c63ff;">
+                        Inteligente
+                    </span>
+
+                </h1>
+
+                <p class="text-muted mt-4 fs-5">
+
+                    Plataforma para análisis de datos clínicos,
+                    predicción de riesgo y generación de reportes
+                    médicos con Machine Learning.
+
+                </p>
+
+                <div class="mt-5">
+
+                    <div class="card border-0 shadow-sm mb-3">
+
+                        <div class="card-body d-flex align-items-center">
+
+                            <div class="me-3">
+                                📈
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Dashboard en tiempo real
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+                                    KPIs clínicos actualizados automáticamente
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card border-0 shadow-sm mb-3">
+
+                        <div class="card-body d-flex align-items-center">
+
+                            <div class="me-3">
+                                🤖
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Predicción de riesgo con ML
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+                                    Modelos entrenados sobre datos reales
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="card border-0 shadow-sm">
+
+                        <div class="card-body d-flex align-items-center">
+
+                            <div class="me-3">
+                                🔄
+                            </div>
+
+                            <div>
+
+                                <strong>
+                                    Pipeline ETL automatizado
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+                                    Procesamiento y limpieza de datos clínicos
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
+
             </div>
 
-            <h1 style="font-size:2.5rem;font-weight:700;color:#E8EEFF;line-height:1.15;margin-bottom:16px;letter-spacing:-1px;">
-                Analítica Clínica<br>
-                <span style="background:linear-gradient(90deg,#0066FF,#7B61FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Inteligente</span>
-            </h1>
-            <p style="color:#6B7A99;font-size:0.95rem;line-height:1.6;margin-bottom:40px;">
-                Plataforma para análisis de datos clínicos, predicción de riesgo y generación de reportes médicos con ML.
-            </p>
-
-            <!-- Feature pills -->
-            <div style="display:flex;flex-direction:column;gap:12px;">
-                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
-                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,217,126,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="bi bi-graph-up-arrow" style="color:#00D97E;font-size:0.95rem;"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:0.82rem;font-weight:600;color:#E8EEFF;">Dashboard en tiempo real</div>
-                        <div style="font-size:0.72rem;color:#6B7A99;">KPIs clínicos actualizados automáticamente</div>
-                    </div>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
-                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(0,102,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="bi bi-cpu-fill" style="color:#0066FF;font-size:0.95rem;"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:0.82rem;font-weight:600;color:#E8EEFF;">Predicción de riesgo con ML</div>
-                        <div style="font-size:0.72rem;color:#6B7A99;">Modelos entrenados sobre datos reales</div>
-                    </div>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;">
-                    <div style="width:32px;height:32px;border-radius:8px;background:rgba(123,97,255,0.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                        <i class="bi bi-arrow-repeat" style="color:#7B61FF;font-size:0.95rem;"></i>
-                    </div>
-                    <div>
-                        <div style="font-size:0.82rem;font-weight:600;color:#E8EEFF;">Pipeline ETL automatizado</div>
-                        <div style="font-size:0.72rem;color:#6B7A99;">Procesamiento y limpieza de datos clínicos</div>
-                    </div>
-                </div>
-            </div>
         </div>
+
+        <!-- LOGIN -->
+
+        <div class="col-lg-6 d-flex align-items-center justify-content-center bg-white">
+
+            <div style="width:100%;max-width:420px;">
+
+                <h1 class="fw-bold mb-2">
+                    Bienvenido
+                </h1>
+
+                <p class="text-muted mb-4">
+                    Ingrese sus credenciales para continuar
+                </p>
+
+                {% if error %}
+
+                <div class="alert alert-danger">
+                    {{ error }}
+                </div>
+
+                {% endif %}
+
+                <form method="post"
+                      action="{% url 'authentication:login' %}">
+
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+                            USUARIO
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-person"></i>
+                            </span>
+
+                            <input
+                                type="text"
+                                name="username"
+                                class="form-control form-control-lg"
+                                placeholder="Nombre de usuario"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mb-4">
+
+                        <label class="form-label fw-semibold">
+                            CONTRASEÑA
+                        </label>
+
+                        <div class="input-group">
+
+                            <span class="input-group-text bg-white">
+                                <i class="bi bi-lock"></i>
+                            </span>
+
+                            <input
+                                type="password"
+                                name="password"
+                                class="form-control form-control-lg"
+                                placeholder="Contraseña"
+                                required>
+
+                        </div>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn btn-lg w-100 text-white fw-bold"
+                        style="
+                            background:linear-gradient(
+                                90deg,
+                                #8b5cf6,
+                                #a855f7
+                            );
+                            border:none;
+                        ">
+
+                        <i class="bi bi-box-arrow-in-right"></i>
+
+                        Ingresar al Sistema
+
+                    </button>
+
+                </form>
+
+                <div class="card mt-4 shadow-sm border-0">
+
+                    <div class="card-body">
+
+                        <small
+                            class="fw-bold text-uppercase text-muted">
+
+                            Accesos de demostración
+
+                        </small>
+
+                        <div class="mt-3">
+
+                            <span class="badge bg-primary">
+                                admin / admin123
+                            </span>
+
+                            <span class="badge bg-success">
+                                medico / medico123
+                            </span>
+
+                            <span class="badge bg-warning text-dark">
+                                analista / analista123
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="text-center mt-4 text-muted">
+
+                    <small>
+                        © 2024 HealthAnalytics IPS —
+                        Sistema de Analítica Clínica
+                    </small>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
-    <!-- Right panel - login form -->
-    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;position:relative;">
-        <div style="width:100%;max-width:380px;">
-            <!-- Mobile logo -->
-            <div class="d-flex d-lg-none align-items-center gap-2 mb-8" style="margin-bottom:32px;">
-                <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0066FF,#7B61FF);display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-heart-pulse-fill text-white" style="font-size:1rem;"></i>
-                </div>
-                <div style="font-weight:700;color:#E8EEFF;">HealthAnalytics IPS</div>
-            </div>
-
-            <div style="margin-bottom:32px;">
-                <h2 style="font-size:1.6rem;font-weight:700;color:#E8EEFF;letter-spacing:-0.5px;margin-bottom:6px;">Bienvenido</h2>
-                <p style="color:#6B7A99;font-size:0.875rem;">Ingrese sus credenciales para continuar</p>
-            </div>
-
-            {% if error %}
-            <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,59,59,0.08);border:1px solid rgba(255,59,59,0.2);border-radius:10px;margin-bottom:20px;">
-                <i class="bi bi-exclamation-circle-fill" style="color:#FF3B3B;flex-shrink:0;"></i>
-                <span style="color:#ff7a7a;font-size:0.875rem;">{{ error }}</span>
-            </div>
-            {% endif %}
-
-            <form method="post" action="{% url 'authentication:login' %}">
-                {% csrf_token %}
-                <div style="margin-bottom:16px;">
-                    <label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Usuario</label>
-                    <div style="position:relative;">
-                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#3D4E6B;">
-                            <i class="bi bi-person" style="font-size:1rem;"></i>
-                        </span>
-                        <input type="text" name="username"
-                               style="width:100%;padding:11px 14px 11px 38px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#E8EEFF;font-size:0.9rem;outline:none;transition:border-color .18s,box-shadow .18s;font-family:'DM Sans',sans-serif;"
-                               placeholder="Nombre de usuario" required autofocus
-                               onfocus="this.style.borderColor='rgba(0,102,255,0.5)';this.style.boxShadow='0 0 0 3px rgba(0,102,255,0.1)'"
-                               onblur="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none'">
-                    </div>
-                </div>
-                <div style="margin-bottom:24px;">
-                    <label style="display:block;font-size:0.75rem;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">Contraseña</label>
-                    <div style="position:relative;">
-                        <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#3D4E6B;">
-                            <i class="bi bi-lock" style="font-size:1rem;"></i>
-                        </span>
-                        <input type="password" name="password"
-                               style="width:100%;padding:11px 14px 11px 38px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#E8EEFF;font-size:0.9rem;outline:none;transition:border-color .18s,box-shadow .18s;font-family:'DM Sans',sans-serif;"
-                               placeholder="Contraseña" required
-                               onfocus="this.style.borderColor='rgba(0,102,255,0.5)';this.style.boxShadow='0 0 0 3px rgba(0,102,255,0.1)'"
-                               onblur="this.style.borderColor='rgba(255,255,255,0.08)';this.style.boxShadow='none'">
-                    </div>
-                </div>
-                <button type="submit" style="width:100%;padding:12px;background:linear-gradient(135deg,#0066FF,#0052CC);border:none;border-radius:10px;color:#fff;font-size:0.9rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .18s,transform .15s;font-family:'DM Sans',sans-serif;"
-                        onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
-                    <i class="bi bi-box-arrow-in-right"></i>
-                    Ingresar al Sistema
-                </button>
-            </form>
-
-            <!-- Demo credentials -->
-            <div style="margin-top:24px;padding:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;">
-                <p style="font-size:0.72rem;font-weight:700;color:#3D4E6B;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;">Accesos de demostración</p>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                    <span style="padding:4px 10px;background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.2);border-radius:6px;font-size:0.72rem;font-family:'Space Mono',monospace;color:#7ab8ff;">admin / admin123</span>
-                    <span style="padding:4px 10px;background:rgba(0,217,126,0.08);border:1px solid rgba(0,217,126,0.2);border-radius:6px;font-size:0.72rem;font-family:'Space Mono',monospace;color:#4ade80;">medico / medico123</span>
-                    <span style="padding:4px 10px;background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.2);border-radius:6px;font-size:0.72rem;font-family:'Space Mono',monospace;color:#fbbf24;">analista / analista123</span>
-                </div>
-            </div>
-
-            <p style="text-align:center;color:#3D4E6B;font-size:0.72rem;margin-top:24px;">
-                &copy; 2024 HealthAnalytics IPS &mdash; Sistema de Analítica Clínica
-            </p>
-        </div>
-    </div>
 </div>
+
 {% endblock %}
