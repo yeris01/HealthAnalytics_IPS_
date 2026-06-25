@@ -2,91 +2,215 @@
 
 {% block title %}Pacientes - HealthAnalytics IPS{% endblock %}
 
-{% block page_title %}
-<i class="bi bi-people-fill me-2 text-primary"></i>Pacientes
+{% block page_title %} <i class="bi bi-people-fill me-2 text-primary"></i>Pacientes
 {% endblock %}
 
 {% block content %}
 
 <div class="card shadow-sm border-0">
 
-    <div class="card-header bg-white">
+```
+<div class="card-header bg-white">
 
-        <form method="GET">
-            <div class="input-group">
-                <input
-                    type="text"
-                    name="q"
-                    class="form-control"
-                    placeholder="Buscar paciente por ID, nombre o apellido..."
-                    value="{{ busqueda|default:'' }}"
-                >
+    <form method="GET">
+        <div class="input-group">
+            <input
+                type="text"
+                name="q"
+                class="form-control"
+                placeholder="Buscar paciente por ID, nombre o apellido..."
+                value="{{ busqueda|default:'' }}"
+            >
 
-                <button class="btn btn-primary" type="submit">
-                    <i class="bi bi-search"></i>
-                    Buscar
-                </button>
-            </div>
-        </form>
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-search"></i>
+                Buscar
+            </button>
+        </div>
+    </form>
 
-    </div>
+</div>
 
-    <div class="card-body table-responsive">
+<div class="card-body table-responsive">
 
-        <table class="table table-hover align-middle">
+    <table class="table table-hover align-middle">
 
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Edad</th>
-                    <th>Sexo</th>
-                    <th>Riesgo</th>
-                    <th>Crítico</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Edad</th>
+                <th>Sexo</th>
+                <th>Riesgo</th>
+                <th>Crítico</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
 
-            <tbody>
+        <tbody>
 
-                {% for p in pacientes %}
-                <tr>
-                    <td>{{ p.id_paciente }}</td>
-                    <td>{{ p.nombres }} {{ p.apellidos }}</td>
-                    <td>{{ p.edad }}</td>
-                    <td>{{ p.sexo }}</td>
-                    <td>{{ p.riesgo_enfermedad }}</td>
+            {% for p in pacientes %}
+            <tr>
+                <td>{{ p.id_paciente }}</td>
+                <td>{{ p.nombres }} {{ p.apellidos }}</td>
+                <td>{{ p.edad }}</td>
+                <td>{{ p.sexo }}</td>
+                <td>{{ p.riesgo_enfermedad }}</td>
 
-                    <td>
-                        {% if p.es_critico %}
-                            <span class="badge bg-danger">Sí</span>
-                        {% else %}
-                            <span class="badge bg-success">No</span>
-                        {% endif %}
-                    </td>
+                <td>
+                    {% if p.es_critico %}
+                        <span class="badge bg-danger">Sí</span>
+                    {% else %}
+                        <span class="badge bg-success">No</span>
+                    {% endif %}
+                </td>
 
-                    <td>
-                        <a href="/ml/?paciente={{ p.id_paciente }}"
-                           class="btn btn-success btn-sm">
-                            <i class="bi bi-heart-pulse"></i>
-                            Diagnóstico
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7" class="text-center text-muted">
-                        No hay pacientes cargados. Ejecute el ETL.
-                    </td>
-                </tr>
-                {% endfor %}
+                <td>
+                    <button
+                        class="btn btn-success btn-sm btn-diagnostico"
+                        data-id="{{ p.id_paciente }}">
+                        <i class="bi bi-heart-pulse"></i>
+                        Diagnóstico
+                    </button>
+                </td>
 
-            </tbody>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center text-muted">
+                    No hay pacientes cargados. Ejecute el ETL.
+                </td>
+            </tr>
+            {% endfor %}
 
-        </table>
+        </tbody>
+
+    </table>
+
+</div>
+```
+
+</div>
+
+<!-- Modal Diagnóstico -->
+
+<div class="modal fade" id="modalDiagnostico" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+
+```
+    <div class="modal-content">
+
+        <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">
+                Diagnóstico IA del Paciente
+            </h5>
+
+            <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal">
+            </button>
+        </div>
+
+        <div class="modal-body" id="resultadoDiagnostico">
+
+        </div>
 
     </div>
 
 </div>
+```
+
+</div>
+
+<script>
+
+document.querySelectorAll('.btn-diagnostico').forEach(btn => {
+
+    btn.addEventListener('click', async function() {
+
+        const id = this.dataset.id;
+
+        const modal = new bootstrap.Modal(
+            document.getElementById('modalDiagnostico')
+        );
+
+        const resultado =
+            document.getElementById('resultadoDiagnostico');
+
+        resultado.innerHTML = `
+            <div class="text-center">
+                Consultando modelo de IA...
+            </div>
+        `;
+
+        modal.show();
+
+        try {
+
+            const response = await fetch(
+                `/ml/api/ml/diagnostico/${id}/`
+            );
+
+            const data = await response.json();
+
+            resultado.innerHTML = `
+
+                <h4>${data.paciente}</h4>
+
+                <hr>
+
+                <p>
+                    <strong>Riesgo Actual:</strong>
+                    ${data.riesgo_actual}
+                </p>
+
+                <p>
+                    <strong>Riesgo Predicho:</strong>
+                    ${data.riesgo_predicho}
+                </p>
+
+                <p>
+                    <strong>Confianza:</strong>
+                    ${(data.confianza * 100).toFixed(2)}%
+                </p>
+
+                <p>
+                    <strong>Paciente Crítico:</strong>
+                    ${data.es_critico ? 'Sí' : 'No'}
+                </p>
+
+                <hr>
+
+                <h5>Probabilidades</h5>
+
+                <ul>
+
+                ${Object.entries(data.probabilidades)
+                    .map(([k,v]) => `
+                        <li>
+                            ${k}: ${(v * 100).toFixed(2)}%
+                        </li>
+                    `).join('')}
+
+                </ul>
+
+            `;
+
+        } catch(error) {
+
+            resultado.innerHTML = `
+                <div class="alert alert-danger">
+                    Error al obtener el diagnóstico.
+                </div>
+            `;
+
+        }
+
+    });
+
+});
+
+</script>
 
 {% endblock %}

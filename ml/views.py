@@ -124,3 +124,51 @@ def predecir_todos(request):
             "mensaje": str(e)
 
         }, status=500)
+    
+# ==========================
+# DIAGNÓSTICO INDIVIDUAL
+# ==========================
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def diagnostico_paciente(request, id_paciente):
+
+    from ml_engine import predecir_paciente
+
+    try:
+
+        paciente = Paciente.objects.get(
+            id_paciente=id_paciente
+        )
+
+        datos = {
+            'edad': paciente.edad,
+            'imc': paciente.imc,
+            'glucosa': paciente.glucosa,
+            'colesterol': paciente.colesterol,
+            'presion_sistolica': paciente.presion_sistolica,
+            'presion_diastolica': paciente.presion_diastolica,
+            'frecuencia_cardiaca': paciente.frecuencia_cardiaca,
+            'saturacion_oxigeno': paciente.saturacion_oxigeno,
+            'temperatura': paciente.temperatura,
+            'fumador': paciente.fumador,
+            'antecedentes_familiares': paciente.antecedentes_familiares,
+            'consumo_alcohol': paciente.consumo_alcohol,
+        }
+
+        resultado = predecir_paciente(datos)
+
+        return Response({
+            'paciente': f'{paciente.nombres} {paciente.apellidos}',
+            'riesgo_actual': paciente.riesgo_enfermedad,
+            'riesgo_predicho': resultado['riesgo_predicho'],
+            'confianza': resultado['confianza'],
+            'probabilidades': resultado['probabilidades'],
+            'es_critico': paciente.es_critico
+        })
+
+    except Exception as e:
+
+        return Response({
+            'error': str(e)
+        }, status=500)
